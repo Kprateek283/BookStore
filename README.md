@@ -56,6 +56,7 @@ A full-stack web application for managing books, reviews, and user interactions.
    CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
    CLOUDINARY_API_KEY=your_cloudinary_api_key
    CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+   FRONTEND_URL=http://localhost:5173
    ```
 
 4. Start the backend server:
@@ -86,27 +87,27 @@ A full-stack web application for managing books, reviews, and user interactions.
 
 ## API Routes
 
-### Authentication Routes
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login user
+### Authentication Routes (`/auth`)
+- `POST /auth/signup` - Register a new user
+- `POST /auth/login` - Login user
 
-### User Routes
-- `GET /api/users/profile` - Get user profile
-- `PUT /api/users/profile` - Update user profile
-- `GET /api/users/:id` - Get user by ID
+### User Routes (`/users`)
+- `GET /users/:id` - Get user by ID (protected)
+- `PUT /users/:id` - Update user by ID (protected)
+- `GET /users` - Get all users (admin only)
 
-### Book Routes
-- `GET /api/books` - Get all books
-- `POST /api/books` - Create a new book
-- `GET /api/books/:id` - Get book by ID
-- `PUT /api/books/:id` - Update book
-- `DELETE /api/books/:id` - Delete book
+### Book Routes (`/books`)
+- `GET /books/featured/get` - Get featured books (protected)
+- `GET /books` - Get all books (protected)
+- `GET /books/:id` - Get book by ID (protected)
+- `POST /books` - Create a new book (admin only, supports image and PDF upload)
+- `DELETE /books/:id` - Delete book (admin only)
 
-### Review Routes
-- `POST /api/reviews` - Create a review
-- `GET /api/reviews/book/:bookId` - Get reviews for a book
-- `PUT /api/reviews/:id` - Update review
-- `DELETE /api/reviews/:id` - Delete review
+### Review Routes (`/reviews`)
+- `GET /reviews/:bookId` - Get all reviews for a book (protected)
+- `POST /reviews/:bookId` - Create a new review for a book (protected)
+
+Note: All routes except authentication routes require a valid JWT token in the Authorization header.
 
 ## Frontend Pages
 - Home Page - Display featured books and recent reviews
