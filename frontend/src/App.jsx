@@ -16,18 +16,15 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/home" />} />
-        <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/home" />} />
+        <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/login" />} />
         <Route path="/signup" element={!isAuthenticated ? <SignupPage /> : <Navigate to="/login" />} />
 
-        {/* Protected Routes */}
         <Route path="/home" element={isAuthenticated ? <HomePage /> : <Navigate to="/login" />} />
         <Route path="/books" element={isAuthenticated ? <BooksPage /> : <Navigate to="/login" />} />
         <Route path="/profile" element={isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />} />
         <Route path="/books/:id" element={isAuthenticated ? <BookDetailsPage /> : <Navigate to="/login" />} />
 
-        {/* Admin Routes */}
         <Route
           path="/create-book"
           element={
@@ -49,8 +46,7 @@ export default function App() {
           }
         />
 
-        {/* Default Route */}
-        <Route path="/" element={<Navigate to="/home" />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
   );

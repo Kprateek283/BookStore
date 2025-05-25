@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from './Button';
+import { useAuth } from '../context/AuthContext';
 
 const Card = ({
     title,
@@ -20,12 +21,39 @@ const Card = ({
     reviews,
     children,
     book,
-    showReviews = true
+    showReviews = true,
+    onDelete
 }) => {
     const navigate = useNavigate();
+    const { user, token, showAlert } = useAuth();
 
     const handleViewDetails = () => {
         navigate(`/books/${book._id}`);
+    };
+
+    const handleDelete = async () => {
+        if (window.confirm('Are you sure you want to delete this book?')) {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/books/${book._id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete book');
+                }
+
+                showAlert('success', 'Book deleted successfully');
+                if (onDelete) {
+                    onDelete(book._id);
+                }
+            } catch (error) {
+                console.error('Error deleting book:', error);
+                showAlert('error', error.message);
+            }
+        }
     };
 
     return (
@@ -99,30 +127,56 @@ const Card = ({
 
                 {children}
 
-                {showButton && (
-                    <Button
-                        variant={buttonVariant}
-                        onClick={handleViewDetails}
-                        className="inline-flex items-center w-full justify-center"
-                    >
-                        {buttonText}
-                        <svg 
-                            className="rtl:rotate-180 w-3.5 h-3.5 ms-2" 
-                            aria-hidden="true" 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            fill="none" 
-                            viewBox="0 0 14 10"
+                <div className="flex gap-2">
+                    {showButton && (
+                        <Button
+                            variant={buttonVariant}
+                            onClick={handleViewDetails}
+                            className="inline-flex items-center justify-center flex-1"
                         >
-                            <path 
-                                stroke="currentColor" 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                strokeWidth="2" 
-                                d="M1 5h12m0 0L9 1m4 4L9 9"
-                            />
-                        </svg>
-                    </Button>
-                )}
+                            {buttonText}
+                            <svg 
+                                className="rtl:rotate-180 w-3.5 h-3.5 ms-2" 
+                                aria-hidden="true" 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                fill="none" 
+                                viewBox="0 0 14 10"
+                            >
+                                <path 
+                                    stroke="currentColor" 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    strokeWidth="2" 
+                                    d="M1 5h12m0 0L9 1m4 4L9 9"
+                                />
+                            </svg>
+                        </Button>
+                    )}
+                    {user?.role === 'admin' && (
+                        <Button
+                            variant="danger"
+                            onClick={handleDelete}
+                            className="inline-flex items-center justify-center bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            Delete
+                            <svg 
+                                className="w-4 h-4 ms-2" 
+                                aria-hidden="true" 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                fill="none" 
+                                viewBox="0 0 18 20"
+                            >
+                                <path 
+                                    stroke="currentColor" 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    strokeWidth="2" 
+                                    d="M1 5h16M7 8v8m4-8v8M7 1h4a1 1 0 0 1 1 1v3H6V2a1 1 0 0 1 1-1ZM3 5h12v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5Z"
+                                />
+                            </svg>
+                        </Button>
+                    )}
+                </div>
             </div>
         </div>
     );

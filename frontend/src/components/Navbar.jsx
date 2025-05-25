@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -6,19 +6,13 @@ const Navbar = () => {
     const { user, logoutUser } = useAuth();
     const navigate = useNavigate();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const timeoutRef = useRef(null);
 
     const handleMouseEnter = () => {
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-        }
         setIsDropdownOpen(true);
     };
 
     const handleMouseLeave = () => {
-        timeoutRef.current = setTimeout(() => {
-            setIsDropdownOpen(false);
-        }, 1000);
+        setIsDropdownOpen(false);
     };
 
     const handleLogout = () => {
@@ -92,7 +86,7 @@ const Navbar = () => {
                     <div className="flex items-center">
                         <button
                             onClick={handleLogout}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                         >
                             Logout
                         </button>

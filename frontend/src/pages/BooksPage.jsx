@@ -18,6 +18,8 @@ const BOOK_CATEGORIES = [
     'History'
 ];
 
+const ITEMS_PER_PAGE = 4;
+
 const calculateAverageRating = (reviews) => {
     if (!reviews || reviews.length === 0) return 0;
     const sum = reviews.reduce((acc, review) => acc + (review.rating || 0), 0);
@@ -30,8 +32,8 @@ const BooksPage = () => {
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
-    // Search and filter states
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [minRating, setMinRating] = useState(0);
@@ -65,7 +67,6 @@ const BooksPage = () => {
             const data = await response.json();
             console.log('Books API Response:', data);
             
-            // Check if data.books exists, if not, use the data directly
             const booksData = data.books || data;
             console.log('Books data to be set:', booksData);
             
@@ -83,7 +84,10 @@ const BooksPage = () => {
         navigate('/login');
     };
 
-    // Filter and search functions
+    const handleBookDelete = (bookId) => {
+        setBooks(books.filter(book => book._id !== bookId));
+    };
+
     const filteredBooks = books.filter(book => {
         if (!book) return false;
         
@@ -102,6 +106,15 @@ const BooksPage = () => {
 
         return matchesSearch && matchesCategory && matchesRating;
     });
+
+    const totalPages = Math.ceil(filteredBooks.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const currentBooks = filteredBooks.slice(startIndex, endIndex);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
 
     if (loading) {
         return (
@@ -126,12 +139,9 @@ const BooksPage = () => {
         <div className="min-h-screen bg-gray-50">
             <Navbar />
             
-            {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Search and Filter Section */}
                 <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {/* Search Input */}
                         <div>
                             <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
                                 Search
@@ -146,7 +156,6 @@ const BooksPage = () => {
                             />
                         </div>
 
-                        {/* Category Filter */}
                         <div>
                             <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
                                 Category
@@ -166,7 +175,6 @@ const BooksPage = () => {
                             </select>
                         </div>
 
-                        {/* Rating Filter */}
                         <div>
                             <label htmlFor="rating" className="block text-sm font-medium text-gray-700 mb-1">
                                 Minimum Rating
@@ -188,9 +196,8 @@ const BooksPage = () => {
                     </div>
                 </div>
 
-                {/* Books Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredBooks.map((book) => (
+                    {currentBooks.map((book) => (
                         <Card
                             key={book._id}
                             book={book}
@@ -203,14 +210,46 @@ const BooksPage = () => {
                             category={book.category}
                             publishedYear={book.publishedYear}
                             reviews={book.reviews}
+                            onDelete={handleBookDelete}
                         />
                     ))}
                 </div>
 
-                {/* No Results Message */}
                 {filteredBooks.length === 0 && (
                     <div className="text-center py-8">
                         <p className="text-gray-500 text-lg">No books found matching your criteria.</p>
+                    </div>
+                )}
+
+                {totalPages > 1 && (
+                    <div className="flex justify-center mt-8 space-x-2">
+                        <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Previous
+                        </button>
+                        {[...Array(totalPages)].map((_, index) => (
+                            <button
+                                key={index + 1}
+                                onClick={() => handlePageChange(index + 1)}
+                                className={`px-4 py-2 border rounded-md text-sm font-medium ${
+                                    currentPage === index + 1
+                                        ? 'bg-blue-600 text-white border-blue-600'
+                                        : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+                                }`}
+                            >
+                                {index + 1}
+                            </button>
+                        ))}
+                        <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
                     </div>
                 )}
             </div>
